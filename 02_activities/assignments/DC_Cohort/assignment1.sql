@@ -16,22 +16,9 @@ FROM "customer"; --Used asterisk, but convention would be to type column names
 /* 2. Write a query that displays all of the columns and 10 rows from the customer table, 
 sorted by customer_last_name, then customer_first_ name. */
 --QUERY 2
--- I was not sure if this question asks for 2 separate queries or a single query sorting with both columns, so I did both:
--- Interpretation 1: Sort by both customer_last_name and customer_first_name in the same query.
 SELECT * 
 FROM "customer"
 ORDER BY customer_last_name, customer_first_name
-LIMIT 10;
-
--- Interpretation 2: Sort by each customer_last_name, then also sort by customer_first_ name.
-SELECT * 
-FROM "customer" 
-ORDER BY customer_last_name
-LIMIT 10;
-
-SELECT * 
-FROM "customer" 
-ORDER BY customer_first_name 
 LIMIT 10;
 
 
@@ -113,7 +100,7 @@ Limit to 24 rows of output. */
 --QUERY 7
 SELECT *
 FROM "vendor"
-JOIN "vendor_booth_assignments"
+INNER JOIN "vendor_booth_assignments"
 	ON "vendor".vendor_id = "vendor_booth_assignments".vendor_id
 ORDER BY market_date, vendor_name
 LIMIT 24;
@@ -146,12 +133,12 @@ HINT: This query requires you to join two tables, use an aggregate function, and
 SELECT "customer".customer_id,
        customer_first_name,
        customer_last_name,
-	   SUM(quantity * cost_per_quantity) AS total_spend
+	   SUM(CAST(quantity * cost_per_quantity AS INTEGER)) AS total_spend
 FROM "customer" 
-JOIN "customer_purchases"
+INNER JOIN "customer_purchases"
 	ON "customer".customer_id = "customer_purchases".customer_id
 GROUP BY "customer".customer_id
-HAVING total_spend > 2000 -- I am not sure if I need to calculate again but this seems to be fine.
+HAVING total_spend > 2000 -- I am not sure if I need to write calculated form again but this seems to be fine.
 ORDER BY customer_last_name, customer_first_name;
 
 
@@ -170,8 +157,18 @@ When inserting the new vendor, you need to appropriately align the columns to be
 VALUES(col1,col2,col3,col4,col5) 
 */
 --QUERY 10
+-- Create the temp table of the vendor information.
+DROP TABLE IF EXISTS "temp.new_vendor"; -- Start by dropping the table if it already exists.
+CREATE TEMP TABLE "temp.new_vendor" AS 
+SELECT *
+FROM "vendor";
 
+-- Add the 10th vendor to the temp table.
+INSERT INTO "temp.new_vendor"
+VALUES (10, "Thomass Superfood Store", "Fresh Focused", "Thomas", "Rosenthal");
 
+-- Check that the temp table was created correctly. Can also re-run to check that the 10th vendor was added correctly.
+SELECT * FROM "temp.new_vendor";
 
 
 --END QUERY
@@ -184,8 +181,12 @@ HINT: you might need to search for strfrtime modifers sqlite on the web to know 
 and year are! 
 Limit to 25 rows of output. */
 --QUERY 11
-
-
+-- The dates are written in YYYY-MM-DD in the customer_purchases table under the column market_date.
+SELECT customer_id, 
+	STRFTIME ('%Y', market_date) AS purchase_year,
+	STRFTIME ('%m', market_date) AS purchase_month
+FROM "customer_purchases"
+LIMIT 25;
 
 
 --END QUERY
@@ -198,8 +199,14 @@ HINTS: you will need to AGGREGATE, GROUP BY, and filter...
 but remember, STRFTIME returns a STRING for your WHERE statement...
 AND be sure you remove the LIMIT from the previous query before aggregating!! */
 --QUERY 12
-
-
+SELECT customer_id, 
+	STRFTIME ('%Y', market_date) AS purchase_year,
+	STRFTIME ('%m', market_date) AS purchase_month,
+	SUM(CAST(quantity * cost_per_quantity AS INTEGER)) AS total_spend
+FROM "customer_purchases"
+WHERE purchase_year = '2022'
+	AND purchase_month = '04'
+GROUP BY customer_id;
 
 
 --END QUERY
