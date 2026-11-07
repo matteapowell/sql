@@ -229,6 +229,7 @@ SELECT * FROM product_units; -- worked!
 /* 1. Delete the older record for whatever product you added. 
 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
+--QUERY 11
 DELETE FROM product_units
 WHERE product_name = 'Apple Pie'
 AND snapshot_timestamp = (
