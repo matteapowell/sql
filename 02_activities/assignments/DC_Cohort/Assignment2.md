@@ -56,9 +56,7 @@ The store wants to keep customer addresses. Propose two architectures for the CU
 
 **HINT:** search type 1 vs type 2 slowly changing dimensions. 
 
-```
-Your answer...
-```
+In Architecture 1, the CUSTOMER_ADDRESS table (6 columns: customer_id, customer_first_name, customer_last_name, street_address, city, province) will simply match to the customer_id and name columns and overwrite the address information when it is updated. That is, it will not retain the old address as an entry. In Architecture 2, an additional column (address_current: yes / no) will all the database to retain all old addresses as entries. When an address is updated, the address_current for the old address can be set to "no" and the new entry can be "yes." It may also be useful to include a date column to record the entry date. In this case, Architecture 1 is Type 1 and Architecture 2 is Type 2.
 
 ***
 
